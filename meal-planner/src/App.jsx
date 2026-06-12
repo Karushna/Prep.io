@@ -56,6 +56,27 @@ export default function App() {
 
   return (
     <div className="app">
+      <aside className="app-sidebar">
+        <div className="sidebar-brand">
+          <span className="sidebar-logo">🥗</span>
+          <span className="sidebar-title">Meal Planner</span>
+        </div>
+
+        <nav className="sidebar-nav">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              className={`nav-item ${tab === item.id ? "active" : ""}`}
+              onClick={() => setTab(item.id)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+              {item.badge && <span className="nav-badge">{item.badge}</span>}
+            </button>
+          ))}
+        </nav>
+      </aside>
+
       <main className="app-content">
         {tab === "home" && (
           <div className="home-page">
@@ -116,27 +137,6 @@ export default function App() {
           />
         )}
       </main>
-
-      <aside className="app-sidebar">
-        <div className="sidebar-brand">
-          <span className="sidebar-logo">🥗</span>
-          <span className="sidebar-title">Meal Planner</span>
-        </div>
-
-        <nav className="sidebar-nav">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${tab === item.id ? "active" : ""}`}
-              onClick={() => setTab(item.id)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
-              {item.badge && <span className="nav-badge">{item.badge}</span>}
-            </button>
-          ))}
-        </nav>
-      </aside>
     </div>
   );
 }

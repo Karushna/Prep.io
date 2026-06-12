@@ -577,7 +577,7 @@
 
 /* Responsive */
 @media (max-width: 700px) {
-  .app { flex-direction: column-reverse; }
+  .app { flex-direction: column; }
   .app-sidebar { width: 100%; height: auto; position: relative; flex-direction: row; }
   .sidebar-brand { display: none; }
   .sidebar-nav { flex-direction: row; padding: 8px; overflow-x: auto; gap: 2px; }
