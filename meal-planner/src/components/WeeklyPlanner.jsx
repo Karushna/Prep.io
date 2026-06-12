@@ -27,6 +27,7 @@ export default function WeeklyPlanner({ plan, recipes, onAssign, onClear, onClea
                 mealType={type}
                 meal={plan[day][type]}
                 recipes={recipes}
+                plan={plan}
                 onAssign={onAssign}
                 onClear={onClear}
               />
