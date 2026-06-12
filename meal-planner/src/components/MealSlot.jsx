@@ -7,6 +7,7 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
   const [activeTags, setActiveTags] = useState([]);
   const [manualName, setManualName] = useState("");
   const [expandedId, setExpandedId] = useState(null);
+  const [timeFilter, setTimeFilter] = useState("any");
 
   function closeModal() {
     setOpen(false);
@@ -14,6 +15,7 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
     setActiveTags([]);
     setManualName("");
     setExpandedId(null);
+    setTimeFilter("any");
   }
 
   function addManualMeal() {
@@ -47,13 +49,25 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
   const filtered = recipes
     .filter((r) => r.category === mealType)
     .filter((r) => r.name.toLowerCase().includes(search.toLowerCase()))
-    .filter((r) => activeTags.length === 0 || activeTags.every((tag) => r.tags?.includes(tag)));
+    .filter((r) => activeTags.length === 0 || activeTags.every((tag) => r.tags?.includes(tag)))
+    .filter((r) => {
+      if (timeFilter === "quick") return r.cookTime && r.cookTime <= 20;
+      if (timeFilter === "medium") return r.cookTime && r.cookTime <= 45;
+      return true;
+    });
 
   return (
     <div className="meal-slot">
       {meal ? (
         <div className="meal-card">
-          <span className="meal-name">{meal.name}</span>
+          <div className="meal-info">
+            <span className="meal-name">{meal.name}</span>
+            {meal.cookTime && (
+              <span className="meal-meta">
+                🕐 {meal.cookTime} min{meal.servings ? ` · serves ${meal.servings}` : ""}
+              </span>
+            )}
+          </div>
           <button className="btn-clear" onClick={() => onClear(day, mealType)} title="Remove">
             ×
           </button>
@@ -113,6 +127,22 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
               ))}
             </div>
 
+            <div className="time-filter">
+              {[
+                { id: "any", label: "Any time" },
+                { id: "quick", label: "Quick · ≤ 20 min" },
+                { id: "medium", label: "Under 45 min" },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  className={`tag-btn ${timeFilter === opt.id ? "active" : ""}`}
+                  onClick={() => setTimeFilter(opt.id)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
             {filtered.length === 0 ? (
               <p className="no-results">No recipes match your filters.</p>
             ) : (
@@ -133,6 +163,9 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
                         )}
                       </div>
                       <div className="recipe-row-right">
+                        {r.cookTime && (
+                          <span className="cook-time-badge">🕐 {r.cookTime} min</span>
+                        )}
                         {r.tags?.length > 0 && (
                           <span className="recipe-tags">
                             {r.tags.map((t) => (

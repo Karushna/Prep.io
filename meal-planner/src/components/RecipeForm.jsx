@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MEAL_TYPES, DIETARY_TAGS } from "../data/recipes";
 
-const blank = { name: "", category: "dinner", tags: [], ingredientsText: "" };
+const blank = { name: "", category: "dinner", tags: [], ingredientsText: "", cookTime: "", servings: "" };
 
 function toInitial(recipe) {
   if (!recipe) return blank;
@@ -10,6 +10,8 @@ function toInitial(recipe) {
     category: recipe.category,
     tags: recipe.tags ?? [],
     ingredientsText: recipe.ingredients.map((i) => `${i.name}: ${i.amount}`).join("\n"),
+    cookTime: recipe.cookTime ?? "",
+    servings: recipe.servings ?? "",
   };
 }
 
@@ -44,7 +46,14 @@ export default function RecipeForm({ initialRecipe, onSave, onCancel }) {
     if (!form.name.trim()) { setError("Recipe name is required."); return; }
     const ingredients = parseIngredients(form.ingredientsText);
     if (ingredients.length === 0) { setError("Add at least one ingredient."); return; }
-    onSave({ name: form.name.trim(), category: form.category, tags: form.tags, ingredients });
+    onSave({
+      name: form.name.trim(),
+      category: form.category,
+      tags: form.tags,
+      ingredients,
+      cookTime: form.cookTime ? parseInt(form.cookTime, 10) : undefined,
+      servings: form.servings ? parseInt(form.servings, 10) : undefined,
+    });
   }
 
   return (
@@ -85,6 +94,33 @@ export default function RecipeForm({ initialRecipe, onSave, onCancel }) {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="form-row">
+        <label className="form-label">
+          Cook time <span className="form-hint">minutes</span>
+          <input
+            className="form-input"
+            type="number"
+            min="1"
+            max="480"
+            value={form.cookTime}
+            onChange={(e) => set("cookTime", e.target.value)}
+            placeholder="e.g. 30"
+          />
+        </label>
+        <label className="form-label">
+          Serves
+          <input
+            className="form-input"
+            type="number"
+            min="1"
+            max="20"
+            value={form.servings}
+            onChange={(e) => set("servings", e.target.value)}
+            placeholder="e.g. 4"
+          />
+        </label>
       </div>
 
       <label className="form-label">

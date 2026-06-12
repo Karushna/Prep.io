@@ -4,6 +4,8 @@ export const recipes = [
     name: "Spaghetti Bolognese",
     category: "dinner",
     tags: [],
+    cookTime: 45,
+    servings: 4,
     ingredients: [
       { name: "Spaghetti", amount: "200g" },
       { name: "Ground beef", amount: "300g" },
@@ -18,6 +20,8 @@ export const recipes = [
     name: "Caesar Salad",
     category: "lunch",
     tags: [],
+    cookTime: 15,
+    servings: 2,
     ingredients: [
       { name: "Romaine lettuce", amount: "1 head" },
       { name: "Caesar dressing", amount: "3 tbsp" },
@@ -31,6 +35,8 @@ export const recipes = [
     name: "Avocado Toast",
     category: "breakfast",
     tags: ["vegan", "vegetarian", "dairy-free"],
+    cookTime: 10,
+    servings: 2,
     ingredients: [
       { name: "Bread", amount: "2 slices" },
       { name: "Avocado", amount: "1" },
@@ -44,6 +50,8 @@ export const recipes = [
     name: "Chicken Stir Fry",
     category: "dinner",
     tags: ["gluten-free", "dairy-free"],
+    cookTime: 20,
+    servings: 3,
     ingredients: [
       { name: "Chicken breast", amount: "300g" },
       { name: "Bell peppers", amount: "2" },
@@ -58,6 +66,8 @@ export const recipes = [
     name: "Greek Yogurt & Berries",
     category: "breakfast",
     tags: ["vegetarian", "gluten-free"],
+    cookTime: 5,
+    servings: 1,
     ingredients: [
       { name: "Greek yogurt", amount: "200g" },
       { name: "Mixed berries", amount: "1 cup" },
@@ -70,6 +80,8 @@ export const recipes = [
     name: "Tomato Soup",
     category: "lunch",
     tags: ["vegetarian", "gluten-free"],
+    cookTime: 30,
+    servings: 4,
     ingredients: [
       { name: "Tomatoes", amount: "4 large" },
       { name: "Vegetable broth", amount: "500ml" },
@@ -83,6 +95,8 @@ export const recipes = [
     name: "Salmon with Veggies",
     category: "dinner",
     tags: ["gluten-free", "dairy-free"],
+    cookTime: 25,
+    servings: 2,
     ingredients: [
       { name: "Salmon fillet", amount: "200g" },
       { name: "Broccoli", amount: "200g" },
@@ -96,6 +110,8 @@ export const recipes = [
     name: "Pancakes",
     category: "breakfast",
     tags: ["vegetarian"],
+    cookTime: 20,
+    servings: 4,
     ingredients: [
       { name: "Flour", amount: "1 cup" },
       { name: "Milk", amount: "200ml" },
@@ -109,6 +125,8 @@ export const recipes = [
     name: "Veggie Wrap",
     category: "lunch",
     tags: ["vegetarian"],
+    cookTime: 10,
+    servings: 2,
     ingredients: [
       { name: "Flour tortilla", amount: "2" },
       { name: "Hummus", amount: "3 tbsp" },
@@ -123,6 +141,8 @@ export const recipes = [
     name: "Beef Tacos",
     category: "dinner",
     tags: [],
+    cookTime: 25,
+    servings: 4,
     ingredients: [
       { name: "Ground beef", amount: "250g" },
       { name: "Taco shells", amount: "6" },
@@ -137,6 +157,8 @@ export const recipes = [
     name: "Oatmeal",
     category: "breakfast",
     tags: ["vegetarian"],
+    cookTime: 10,
+    servings: 2,
     ingredients: [
       { name: "Rolled oats", amount: "1 cup" },
       { name: "Milk", amount: "250ml" },
@@ -150,6 +172,8 @@ export const recipes = [
     name: "Pasta Primavera",
     category: "dinner",
     tags: ["vegetarian"],
+    cookTime: 25,
+    servings: 4,
     ingredients: [
       { name: "Penne pasta", amount: "200g" },
       { name: "Zucchini", amount: "1" },

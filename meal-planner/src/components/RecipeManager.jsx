@@ -43,6 +43,8 @@ export default function RecipeManager({ customRecipes, onAdd, onUpdate, onDelete
                   <span className="manager-item-name">{r.name}</span>
                   <span className="manager-item-meta">
                     {r.category}
+                    {r.cookTime && <> · 🕐 {r.cookTime} min</>}
+                    {r.servings && <> · Serves {r.servings}</>}
                     {r.tags?.length > 0 && (
                       <> · {r.tags.map((t) => <span key={t} className="recipe-tag">{t}</span>)}</>
                     )}
