@@ -55,6 +55,16 @@ export default function ShoppingList({ items, checked, onToggle }) {
             ))}
           </span>
         </div>
+        <a
+          href={`https://www.walmart.com/search?q=${encodeURIComponent(item.name)}`}
+          target="_blank"
+          rel="noreferrer"
+          className="btn-walmart"
+          onClick={(e) => e.stopPropagation()}
+          title={`Buy ${item.name} on Walmart`}
+        >
+          Buy
+        </a>
       </li>
     );
   }
