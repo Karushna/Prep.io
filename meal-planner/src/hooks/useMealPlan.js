@@ -1,17 +1,30 @@
 import { useState, useEffect } from "react";
-import { DAYS, MEAL_TYPES } from "../data/recipes";
+import { MEAL_TYPES } from "../data/recipes";
 
-const emptyPlan = () =>
-  Object.fromEntries(
-    DAYS.map((day) => [day, Object.fromEntries(MEAL_TYPES.map((type) => [type, null]))])
-  );
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-function isValidPlan(parsed) {
-  if (!parsed || typeof parsed !== "object") return false;
-  return DAYS.every((day) => {
-    const d = parsed[day];
-    return d && typeof d === "object" && MEAL_TYPES.every((t) => t in d);
+export function getMonday(d) {
+  const dt = new Date(d);
+  const day = dt.getDay();
+  dt.setDate(dt.getDate() - day + (day === 0 ? -6 : 1));
+  dt.setHours(0, 0, 0, 0);
+  return dt;
+}
+
+export function getWeekDates(weekStart) {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + i);
+    return d.toISOString().split("T")[0];
   });
+}
+
+function isOldFormat(parsed) {
+  return parsed && typeof parsed === "object" && DAY_NAMES.some((name) => name in parsed);
+}
+
+function emptyDay() {
+  return Object.fromEntries(MEAL_TYPES.map((t) => [t, null]));
 }
 
 export function useMealPlan() {
@@ -20,41 +33,47 @@ export function useMealPlan() {
       const saved = localStorage.getItem("mealPlan");
       if (saved) {
         const parsed = JSON.parse(saved);
-        return isValidPlan(parsed) ? parsed : emptyPlan();
+        if (isOldFormat(parsed)) return {};
+        return parsed && typeof parsed === "object" ? parsed : {};
       }
     } catch {
       // fall through
     }
-    return emptyPlan();
+    return {};
   });
 
   useEffect(() => {
     localStorage.setItem("mealPlan", JSON.stringify(plan));
   }, [plan]);
 
-  function assignMeal(day, mealType, recipe) {
+  function assignMeal(dateStr, mealType, recipe) {
     setPlan((prev) => ({
       ...prev,
-      [day]: { ...prev[day], [mealType]: recipe },
+      [dateStr]: { ...(prev[dateStr] ?? emptyDay()), [mealType]: recipe },
     }));
   }
 
-  function clearMeal(day, mealType) {
+  function clearMeal(dateStr, mealType) {
     setPlan((prev) => ({
       ...prev,
-      [day]: { ...prev[day], [mealType]: null },
+      [dateStr]: { ...(prev[dateStr] ?? emptyDay()), [mealType]: null },
     }));
   }
 
-  function clearAll() {
-    setPlan(emptyPlan());
+  function clearWeek(weekDates) {
+    setPlan((prev) => {
+      const next = { ...prev };
+      weekDates.forEach((d) => delete next[d]);
+      return next;
+    });
   }
 
-  function getShoppingList() {
+  function getShoppingList(weekDates) {
     const ingredientMap = {};
-    for (const day of DAYS) {
+    for (const dateStr of weekDates) {
+      const dayPlan = plan[dateStr] ?? {};
       for (const type of MEAL_TYPES) {
-        const recipe = plan[day][type];
+        const recipe = dayPlan[type];
         if (!recipe) continue;
         for (const ing of recipe.ingredients) {
           const key = ing.name.toLowerCase();
@@ -68,5 +87,5 @@ export function useMealPlan() {
     return Object.values(ingredientMap).sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  return { plan, assignMeal, clearMeal, clearAll, getShoppingList };
+  return { plan, assignMeal, clearMeal, clearWeek, getShoppingList };
 }

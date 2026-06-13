@@ -76,13 +76,13 @@ const TOOLS = [
   },
 ];
 
-function buildSystemPrompt(plan, allRecipes, shoppingList) {
-  const planLines = DAYS.map((day) => {
+function buildSystemPrompt(plan, allRecipes, shoppingList, weekDates) {
+  const planLines = DAYS.map((dayName, i) => {
     const slots = MEAL_TYPES.map((type) => {
-      const meal = plan[day][type];
+      const meal = plan[weekDates[i]]?.[type];
       return `${type}=${meal ? meal.name : "(empty)"}`;
     });
-    return `  ${day}: ${slots.join(", ")}`;
+    return `  ${dayName} (${weekDates[i]}): ${slots.join(", ")}`;
   }).join("\n");
 
   const recipeList = allRecipes
@@ -123,7 +123,7 @@ const EXAMPLES = [
   "Generate a spicy tofu stir-fry recipe",
 ];
 
-export default function ChatBot({ plan, allRecipes, shoppingList, onAssignMeal, onClearMeal, onClearAll, onAddRecipe, onNavigate }) {
+export default function ChatBot({ plan, allRecipes, shoppingList, weekDates, onAssignMeal, onClearMeal, onClearWeek, onAddRecipe, onNavigate }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -139,16 +139,20 @@ export default function ChatBot({ plan, allRecipes, shoppingList, onAssignMeal, 
       if (name === "assign_meal") {
         const recipe = allRecipes.find((r) => String(r.id) === String(args.recipe_id));
         if (!recipe) return `Error: no recipe with id=${args.recipe_id}.`;
-        onAssignMeal(args.day, args.meal_type, recipe);
-        return `Assigned "${recipe.name}" to ${args.day} ${args.meal_type}.`;
+        const dateStr = weekDates[DAYS.indexOf(args.day)];
+        if (!dateStr) return `Error: unknown day ${args.day}.`;
+        onAssignMeal(dateStr, args.meal_type, recipe);
+        return `Assigned "${recipe.name}" to ${args.day} (${dateStr}) ${args.meal_type}.`;
       }
       if (name === "clear_meal") {
-        onClearMeal(args.day, args.meal_type);
+        const dateStr = weekDates[DAYS.indexOf(args.day)];
+        if (!dateStr) return `Error: unknown day ${args.day}.`;
+        onClearMeal(dateStr, args.meal_type);
         return `Cleared ${args.day} ${args.meal_type}.`;
       }
       if (name === "clear_week") {
-        onClearAll();
-        return "Cleared all meals.";
+        onClearWeek(weekDates);
+        return "Cleared all meals for this week.";
       }
       if (name === "generate_recipe") {
         const recipe = await generateRecipe(args.description);
@@ -176,7 +180,7 @@ export default function ChatBot({ plan, allRecipes, shoppingList, onAssignMeal, 
     setLoading(true);
 
     try {
-      const systemPrompt = buildSystemPrompt(plan, allRecipes, shoppingList);
+      const systemPrompt = buildSystemPrompt(plan, allRecipes, shoppingList, weekDates);
       const apiMessages = [
         { role: "system", content: systemPrompt },
         ...messages.map((m) => ({ role: m.role, content: m.content })),

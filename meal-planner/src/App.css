@@ -140,6 +140,56 @@
 .home-card-arrow { color: #ccc; font-size: 1rem; flex-shrink: 0; transition: color 0.15s; }
 .home-card:hover .home-card-arrow { color: #2d6a4f; }
 
+/* Week navigation bar */
+.planner-week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.planner-week-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1b4332;
+  min-width: 140px;
+  text-align: center;
+}
+
+.planner-nav-btn {
+  background: none;
+  border: 1px solid #d4e6da;
+  border-radius: 6px;
+  color: #2d6a4f;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 4px 12px;
+  transition: all 0.15s;
+}
+.planner-nav-btn:hover { background: #f0faf4; border-color: #52b788; }
+
+/* Day label with date number */
+.day-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+.day-short { font-weight: 600; font-size: 0.82rem; color: #555; }
+.day-date-num { font-size: 1.1rem; font-weight: 700; color: #333; line-height: 1.2; }
+
+/* Today highlight */
+.today-col .day-short { color: #2d6a4f; }
+.today-col .day-date-num {
+  color: white;
+  background: #2d6a4f;
+  border-radius: 6px;
+  padding: 1px 7px;
+  display: inline-block;
+}
+
 /* Two-column form row */
 .form-row { display: flex; gap: 16px; }
 .form-row .form-label { flex: 1; }
@@ -190,11 +240,7 @@
 
 .day-label {
   padding: 8px 4px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  color: #333;
+  align-items: flex-start;
 }
 
 /* Meal slot */

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { DIETARY_TAGS, DAYS, MEAL_TYPES } from "../data/recipes";
+import { DIETARY_TAGS, MEAL_TYPES } from "../data/recipes";
 
-export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign, onClear }) {
+export default function MealSlot({ dateStr, mealType, meal, recipes, plan, onAssign, onClear }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activeTags, setActiveTags] = useState([]);
@@ -21,14 +21,14 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
   function addManualMeal() {
     const trimmed = manualName.trim();
     if (!trimmed) return;
-    onAssign(day, mealType, { id: `manual-${Date.now()}`, name: trimmed, ingredients: [], tags: [], category: mealType });
+    onAssign(dateStr, mealType, { id: `manual-${Date.now()}`, name: trimmed, ingredients: [], tags: [], category: mealType });
     closeModal();
   }
 
   function surpriseMe() {
     const pool = recipes.filter((r) => r.category === mealType);
     if (pool.length === 0) return;
-    onAssign(day, mealType, pool[Math.floor(Math.random() * pool.length)]);
+    onAssign(dateStr, mealType, pool[Math.floor(Math.random() * pool.length)]);
   }
 
   function toggleTag(tag) {
@@ -43,7 +43,9 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
   }
 
   const usedIds = new Set(
-    DAYS.flatMap((d) => MEAL_TYPES.map((t) => plan?.[d]?.[t]?.id)).filter(Boolean)
+    Object.values(plan ?? {}).flatMap((dayPlan) =>
+      MEAL_TYPES.map((t) => dayPlan?.[t]?.id)
+    ).filter(Boolean)
   );
 
   const filtered = recipes
@@ -68,7 +70,7 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
               </span>
             )}
           </div>
-          <button className="btn-clear" onClick={() => onClear(day, mealType)} title="Remove">
+          <button className="btn-clear" onClick={() => onClear(dateStr, mealType)} title="Remove">
             ×
           </button>
         </div>
@@ -87,7 +89,7 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>
-              {mealType.charAt(0).toUpperCase() + mealType.slice(1)} — {day}
+              {mealType.charAt(0).toUpperCase() + mealType.slice(1)} — {dateStr}
             </h3>
 
             <div className="manual-entry">
@@ -152,7 +154,7 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
                     <div
                       className="recipe-row"
                       onClick={() => {
-                        onAssign(day, mealType, r);
+                        onAssign(dateStr, mealType, r);
                         closeModal();
                       }}
                     >

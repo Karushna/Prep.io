@@ -3,16 +3,25 @@ import WeeklyPlanner from "./components/WeeklyPlanner";
 import ShoppingList from "./components/ShoppingList";
 import RecipeManager from "./components/RecipeManager";
 import ChatBot from "./components/ChatBot";
-import { useMealPlan } from "./hooks/useMealPlan";
+import { useMealPlan, getMonday, getWeekDates } from "./hooks/useMealPlan";
 import { useRecipes } from "./hooks/useRecipes";
 import { DAYS, MEAL_TYPES } from "./data/recipes";
 import { planWeek, suggestFromIngredients, estimateNutrition } from "./services/openai";
 import "./App.css";
 
 export default function App() {
-  const { plan, assignMeal, clearMeal, clearAll, getShoppingList } = useMealPlan();
+  const { plan, assignMeal, clearMeal, clearWeek, getShoppingList } = useMealPlan();
   const { allRecipes, customRecipes, addRecipe, updateRecipe, deleteRecipe } = useRecipes();
   const [tab, setTab] = useState("home");
+  const [weekStart, setWeekStart] = useState(() => getMonday(new Date()));
+  const weekDates = getWeekDates(weekStart);
+
+  function prevWeek() {
+    setWeekStart((d) => { const n = new Date(d); n.setDate(n.getDate() - 7); return n; });
+  }
+  function nextWeek() {
+    setWeekStart((d) => { const n = new Date(d); n.setDate(n.getDate() + 7); return n; });
+  }
 
   const [checked, setChecked] = useState(() => {
     try {
@@ -38,7 +47,7 @@ export default function App() {
   const [weekNutrition, setWeekNutrition] = useState(null);
   const [nutritionLoading, setNutritionLoading] = useState(false);
 
-  const shoppingList = getShoppingList();
+  const shoppingList = getShoppingList(weekDates);
 
   useEffect(() => {
     const validNames = new Set(shoppingList.map((i) => i.name));
@@ -49,7 +58,7 @@ export default function App() {
       localStorage.setItem("shoppingChecked", JSON.stringify(pruned));
       return pruned;
     });
-  }, [plan]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [plan, weekDates.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleChecked(name) {
     setChecked((prev) => {
@@ -66,9 +75,11 @@ export default function App() {
       const result = await planWeek(allRecipes, plan, DAYS, MEAL_TYPES);
       const recipeMap = Object.fromEntries(allRecipes.map((r) => [String(r.id), r]));
       result.assignments.forEach(({ day, type, recipeId }) => {
+        const dateStr = weekDates[DAYS.indexOf(day)];
+        if (!dateStr) return;
         const recipe = recipeMap[String(recipeId)];
-        if (recipe && !plan[day]?.[type]) {
-          assignMeal(day, type, recipe);
+        if (recipe && !plan[dateStr]?.[type]) {
+          assignMeal(dateStr, type, recipe);
         }
       });
     } catch (e) {
@@ -97,9 +108,9 @@ export default function App() {
     setNutritionLoading(true);
     const seen = new Set();
     const recipes = [];
-    for (const day of DAYS) {
+    for (const dateStr of weekDates) {
       for (const type of MEAL_TYPES) {
-        const r = plan[day]?.[type];
+        const r = plan[dateStr]?.[type];
         if (r && r.ingredients?.length > 0 && !seen.has(String(r.id))) {
           seen.add(String(r.id));
           recipes.push(r);
@@ -107,8 +118,8 @@ export default function App() {
       }
     }
 
-    const totalMeals = DAYS.reduce(
-      (sum, day) => sum + MEAL_TYPES.filter((t) => plan[day]?.[t] !== null).length,
+    const totalMeals = weekDates.reduce(
+      (sum, dateStr) => sum + MEAL_TYPES.filter((t) => plan[dateStr]?.[t] !== null).length,
       0
     );
 
@@ -154,12 +165,13 @@ export default function App() {
     setTab("recipes");
   }
 
-  const mealsPlanned = DAYS.reduce(
-    (sum, day) => sum + MEAL_TYPES.filter((t) => plan[day]?.[t] !== null).length,
+  const mealsPlanned = weekDates.reduce(
+    (sum, dateStr) => sum + MEAL_TYPES.filter((t) => plan[dateStr]?.[t] !== null).length,
     0
   );
 
-  const todayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
+  const todayDateStr = new Date().toISOString().split("T")[0];
+  const todayDayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   const navItems = [
     { id: "home", label: "Home", icon: "⌂" },
@@ -353,9 +365,13 @@ export default function App() {
           <WeeklyPlanner
             plan={plan}
             recipes={allRecipes}
+            weekStart={weekStart}
+            weekDates={weekDates}
             onAssign={assignMeal}
             onClear={clearMeal}
-            onClearAll={clearAll}
+            onClearWeek={() => clearWeek(weekDates)}
+            onPrevWeek={prevWeek}
+            onNextWeek={nextWeek}
             onAIPlan={handleAIPlan}
             aiPlanLoading={aiPlanLoading}
             aiPlanError={aiPlanError}
@@ -378,19 +394,20 @@ export default function App() {
               plan={plan}
               allRecipes={allRecipes}
               shoppingList={shoppingList}
+              weekDates={weekDates}
               onAssignMeal={assignMeal}
               onClearMeal={clearMeal}
-              onClearAll={clearAll}
+              onClearWeek={clearWeek}
               onAddRecipe={addRecipe}
               onNavigate={setTab}
             />
             <div className="chat-today-panel">
               <div className="chat-today-header">
                 <span className="chat-today-heading">Today</span>
-                <span className="chat-today-day">{todayName}</span>
+                <span className="chat-today-day">{todayDayName}</span>
               </div>
               {MEAL_TYPES.map((type) => {
-                const meal = plan[todayName]?.[type];
+                const meal = plan[todayDateStr]?.[type];
                 return (
                   <div key={type} className="chat-today-slot">
                     <span className="chat-today-type">{type.charAt(0).toUpperCase() + type.slice(1)}</span>
