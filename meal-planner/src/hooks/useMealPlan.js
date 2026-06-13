@@ -6,14 +6,26 @@ const emptyPlan = () =>
     DAYS.map((day) => [day, Object.fromEntries(MEAL_TYPES.map((type) => [type, null]))])
   );
 
+function isValidPlan(parsed) {
+  if (!parsed || typeof parsed !== "object") return false;
+  return DAYS.every((day) => {
+    const d = parsed[day];
+    return d && typeof d === "object" && MEAL_TYPES.every((t) => t in d);
+  });
+}
+
 export function useMealPlan() {
   const [plan, setPlan] = useState(() => {
     try {
       const saved = localStorage.getItem("mealPlan");
-      return saved ? JSON.parse(saved) : emptyPlan();
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return isValidPlan(parsed) ? parsed : emptyPlan();
+      }
     } catch {
-      return emptyPlan();
+      // fall through
     }
+    return emptyPlan();
   });
 
   useEffect(() => {

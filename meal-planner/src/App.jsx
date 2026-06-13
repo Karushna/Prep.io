@@ -97,7 +97,7 @@ export default function App() {
   }
 
   const mealsPlanned = DAYS.reduce(
-    (sum, day) => sum + MEAL_TYPES.filter((t) => plan[day][t] !== null).length,
+    (sum, day) => sum + MEAL_TYPES.filter((t) => plan[day]?.[t] !== null).length,
     0
   );
 
