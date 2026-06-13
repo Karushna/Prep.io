@@ -216,35 +216,92 @@
 
 .section-header-actions { display: flex; align-items: center; gap: 10px; }
 
-/* Planner grid */
-.planner-grid {
-  display: grid;
-  grid-template-columns: 110px repeat(3, 1fr);
+/* Planner day cards */
+.planner-cards {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.grid-header {
-  padding: 8px 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
+.day-card {
+  background: white;
+  border: 1px solid #e2ebe6;
+  border-radius: 12px;
+  overflow: hidden;
+  border-left: 3px solid transparent;
+}
+
+.day-card-today {
+  border-left-color: #2d6a4f;
+}
+
+.day-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #f8fdfb;
+  border-bottom: 1px solid #e8f0ea;
+}
+
+.day-card-today .day-card-header {
+  background: #2d6a4f;
+}
+
+.day-card-today .day-short,
+.day-card-today .day-date-num {
+  color: white;
+}
+
+.day-short {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #555;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #666;
-  text-align: center;
+  letter-spacing: 0.04em;
 }
 
-/* Each day row spans all 4 columns and creates its own 4-col sub-grid */
-.day-row {
-  display: contents;
+.day-date-num {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #222;
+  line-height: 1;
 }
 
-.day-label {
-  padding: 8px 4px;
-  align-items: flex-start;
+.day-today-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(255,255,255,0.25);
+  color: white;
+  border-radius: 10px;
+  padding: 2px 8px;
+  letter-spacing: 0.05em;
+}
+
+.day-card-meals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.day-meal-col {
+  padding: 10px 12px;
+  border-right: 1px solid #f0f5f1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.day-meal-col:last-child { border-right: none; }
+
+.day-meal-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #b0bdb2;
 }
 
 /* Meal slot */
-.meal-slot { min-height: 56px; display: flex; align-items: center; }
+.meal-slot { min-height: 48px; display: flex; align-items: center; }
 
 .slot-empty-actions { display: flex; gap: 6px; width: 100%; }
 
@@ -521,16 +578,40 @@
 /* Shopping list */
 .item-count { font-size: 0.85rem; color: #888; font-weight: 500; }
 
+.shopping-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.shopping-progress-bar {
+  height: 6px;
+  background: #e8ede9;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.shopping-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #52b788, #2d6a4f);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+.shopping-progress-text {
+  font-size: 0.75rem;
+  color: #999;
+  text-align: right;
+}
+
 .shopping-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
 
 .shopping-item {
   background: white;
   border: 1px solid #e8e8e8;
-  border-radius: 8px;
-  padding: 10px 14px;
+  border-radius: 10px;
+  padding: 12px 14px;
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -539,27 +620,24 @@
 .shopping-item.checked .item-name { text-decoration: line-through; }
 
 .shopping-item input[type="checkbox"] {
-  margin-top: 3px;
   accent-color: #2d6a4f;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
   cursor: pointer;
 }
 
-.item-details { display: flex; flex-direction: column; gap: 3px; }
+.item-details { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .item-name { font-weight: 600; font-size: 0.9rem; }
-.item-amounts { display: flex; flex-wrap: wrap; gap: 5px; }
-
-.amount-tag {
-  font-size: 0.75rem;
-  background: #f0faf4;
-  border: 1px solid #d4edda;
-  border-radius: 4px;
-  padding: 1px 7px;
-  color: #555;
+.item-amounts {
+  font-size: 0.78rem;
+  color: #999;
+  display: block;
+  margin-top: 2px;
 }
-.amount-tag em { color: #888; font-style: normal; }
+
+.amount-tag { font-size: 0.78rem; color: #999; }
+.amount-tag em { font-style: normal; color: #bbb; }
 
 .empty-msg { color: #999; font-size: 0.95rem; margin-top: 8px; }
 
@@ -755,6 +833,48 @@
 /* Shopping list — aisle groups */
 .shopping-aisle-group { margin-bottom: 16px; }
 .shopping-aisle-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #2d6a4f;
+  margin-bottom: 8px;
+}
+
+/* Shopping stats bar */
+.shopping-stats {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.shopping-stat { font-size: 0.8rem; color: #666; font-weight: 500; }
+.shopping-stat-sep { color: #ccc; font-size: 0.8rem; }
+.shopping-stat-left { color: #2d6a4f; font-weight: 600; }
+.shopping-stats .shopping-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #e8ede9;
+  border-radius: 99px;
+  overflow: hidden;
+  flex-basis: 100%;
+  margin-top: 2px;
+}
+.shopping-stats .shopping-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #52b788, #2d6a4f);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+/* Day context in amount tags */
+.amount-day-ctx { color: #52b788; font-weight: 600; font-size: 0.74rem; }
+.amount-sep { color: #ddd; }
+
+/* Shopping — sort by day groups */
+.shopping-day-group { margin-bottom: 20px; }
+.shopping-day-label {
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;

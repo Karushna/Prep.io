@@ -70,7 +70,9 @@ export function useMealPlan() {
 
   function getShoppingList(weekDates) {
     const ingredientMap = {};
-    for (const dateStr of weekDates) {
+    for (let i = 0; i < weekDates.length; i++) {
+      const dateStr = weekDates[i];
+      const dayName = DAY_NAMES[i];
       const dayPlan = plan[dateStr] ?? {};
       for (const type of MEAL_TYPES) {
         const recipe = dayPlan[type];
@@ -80,7 +82,13 @@ export function useMealPlan() {
           if (!ingredientMap[key]) {
             ingredientMap[key] = { name: ing.name, amounts: [] };
           }
-          ingredientMap[key].amounts.push({ amount: ing.amount, recipe: recipe.name });
+          ingredientMap[key].amounts.push({
+            amount: ing.amount,
+            recipe: recipe.name,
+            day: dayName,
+            mealType: type,
+            dateStr,
+          });
         }
       }
     }

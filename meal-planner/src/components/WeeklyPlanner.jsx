@@ -2,6 +2,7 @@ import MealSlot from "./MealSlot";
 import { MEAL_TYPES } from "../data/recipes";
 
 const SHORT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const MEAL_LABELS = { breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner" };
 const todayStr = new Date().toISOString().split("T")[0];
 
 export default function WeeklyPlanner({
@@ -33,33 +34,32 @@ export default function WeeklyPlanner({
 
       {aiPlanError && <p className="form-error" style={{ marginBottom: 12 }}>{aiPlanError}</p>}
 
-      <div className="planner-grid">
-        <div className="grid-header" />
-        {MEAL_TYPES.map((type) => (
-          <div key={type} className="grid-header meal-type-label">
-            {type.charAt(0).toUpperCase() + type.slice(1)}
-          </div>
-        ))}
+      <div className="planner-cards">
         {weekDates.map((dateStr, i) => {
           const isToday = dateStr === todayStr;
           return (
-            <div key={dateStr} className="day-row">
-              <div className={`day-label ${isToday ? "today-col" : ""}`}>
+            <div key={dateStr} className={`day-card ${isToday ? "day-card-today" : ""}`}>
+              <div className="day-card-header">
                 <span className="day-short">{SHORT_DAYS[i]}</span>
                 <span className="day-date-num">{parseInt(dateStr.split("-")[2])}</span>
+                {isToday && <span className="day-today-badge">Today</span>}
               </div>
-              {MEAL_TYPES.map((type) => (
-                <MealSlot
-                  key={dateStr + type}
-                  dateStr={dateStr}
-                  mealType={type}
-                  meal={plan[dateStr]?.[type] ?? null}
-                  recipes={recipes}
-                  plan={plan}
-                  onAssign={onAssign}
-                  onClear={onClear}
-                />
-              ))}
+              <div className="day-card-meals">
+                {MEAL_TYPES.map((type) => (
+                  <div key={type} className="day-meal-col">
+                    <span className="day-meal-label">{MEAL_LABELS[type]}</span>
+                    <MealSlot
+                      dateStr={dateStr}
+                      mealType={type}
+                      meal={plan[dateStr]?.[type] ?? null}
+                      recipes={recipes}
+                      plan={plan}
+                      onAssign={onAssign}
+                      onClear={onClear}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           );
         })}
