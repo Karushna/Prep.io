@@ -209,7 +209,7 @@ export default function App() {
           <div className="home-page">
             <div className="home-main">
             <div className="home-hero">
-              <h1>Plan your week,<br />simplify your shopping.</h1>
+              <h1>Plan your meals,<br />simplify your cooking!</h1>
               <p>Organise meals for every day, build your recipe library, and get a ready-to-go shopping list — all in one place.</p>
             </div>
 
