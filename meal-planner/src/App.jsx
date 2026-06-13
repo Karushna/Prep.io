@@ -114,7 +114,7 @@ export default function App() {
       <aside className="app-sidebar">
         <div className="sidebar-brand">
           <span className="sidebar-logo">🥗</span>
-          <span className="sidebar-title">Meal Planner</span>
+          <span className="sidebar-title">Prep.io</span>
         </div>
 
         <nav className="sidebar-nav">
