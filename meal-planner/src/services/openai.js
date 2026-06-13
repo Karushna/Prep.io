@@ -90,6 +90,22 @@ export async function organizeShoppingList(items) {
   ]);
 }
 
+export async function chatWithTools(messages, tools) {
+  const key = import.meta.env.VITE_OPENAI_API_KEY;
+  if (!key) throw new Error("Add VITE_OPENAI_API_KEY to your .env file.");
+  const res = await fetch(BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({ model: MODEL, messages, tools, tool_choice: "auto" }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message ?? `API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.choices[0];
+}
+
 export async function estimateNutrition(recipe) {
   return chat([
     {

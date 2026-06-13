@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import WeeklyPlanner from "./components/WeeklyPlanner";
 import ShoppingList from "./components/ShoppingList";
 import RecipeManager from "./components/RecipeManager";
+import ChatBot from "./components/ChatBot";
 import { useMealPlan } from "./hooks/useMealPlan";
 import { useRecipes } from "./hooks/useRecipes";
 import { DAYS, MEAL_TYPES } from "./data/recipes";
@@ -102,6 +103,7 @@ export default function App() {
 
   const navItems = [
     { id: "home", label: "Home", icon: "⌂" },
+    { id: "chat", label: "AI Chat", icon: "💬" },
     { id: "planner", label: "Weekly Plan", icon: "📅", badge: mealsPlanned > 0 ? `${mealsPlanned}/21` : null },
     { id: "shopping", label: "Shopping List", icon: "🛒", badge: shoppingList.length > 0 ? shoppingList.length : null },
     { id: "recipes", label: "My Recipes", icon: "🍴", badge: customRecipes.length > 0 ? customRecipes.length : null },
@@ -246,6 +248,18 @@ export default function App() {
             onAdd={addRecipe}
             onUpdate={updateRecipe}
             onDelete={deleteRecipe}
+          />
+        )}
+        {tab === "chat" && (
+          <ChatBot
+            plan={plan}
+            allRecipes={allRecipes}
+            shoppingList={shoppingList}
+            onAssignMeal={assignMeal}
+            onClearMeal={clearMeal}
+            onClearAll={clearAll}
+            onAddRecipe={addRecipe}
+            onNavigate={setTab}
           />
         )}
       </main>
