@@ -589,6 +589,110 @@
 
 .form-actions { display: flex; gap: 10px; padding-top: 4px; }
 
+/* AI button */
+.btn-ai {
+  background: linear-gradient(135deg, #2d6a4f, #40916c);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 7px 14px;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.btn-ai:hover { opacity: 0.88; }
+.btn-ai:disabled { opacity: 0.5; cursor: default; }
+
+/* AI generator panel in recipe manager */
+.ai-panel {
+  background: linear-gradient(135deg, #f0faf4, #e8f5e9);
+  border: 1px solid #b7dfc9;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ai-panel h3 { font-size: 1rem; font-weight: 600; color: #1b4332; }
+.ai-panel-hint { font-size: 0.84rem; color: #666; }
+
+/* Recipe manager item with nutrition below */
+.manager-item-column { flex-direction: column; align-items: stretch; }
+.manager-item-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* Nutrition row */
+.nutrition-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #efefef;
+}
+.nutrition-badge {
+  font-size: 0.75rem;
+  background: #f0faf4;
+  border: 1px solid #b7dfc9;
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: #2d6a4f;
+  font-weight: 500;
+}
+.nutrition-error { font-size: 0.78rem; color: #c0392b; }
+
+/* Fridge scan panel on home page */
+.fridge-scan {
+  background: white;
+  border: 1px solid #e2ebe6;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fridge-scan h3 { font-size: 1rem; font-weight: 600; color: #1b4332; }
+.fridge-scan > p { font-size: 0.84rem; color: #777; }
+.fridge-input-row { display: flex; gap: 8px; }
+.fridge-input-row .form-input { flex: 1; }
+
+.fridge-results { display: flex; flex-direction: column; gap: 10px; }
+.fridge-results-label { font-size: 0.82rem; font-weight: 600; color: #555; }
+
+.fridge-match-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.fridge-match-item {
+  background: #f8fdfb;
+  border: 1px solid #d4edda;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.fridge-missing { font-size: 0.77rem; color: #999; }
+
+.fridge-suggestion {
+  background: #f0faf4;
+  border: 1px solid #b7dfc9;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fridge-suggestion p { font-size: 0.88rem; color: #444; }
+
+/* Shopping list — aisle groups */
+.shopping-aisle-group { margin-bottom: 16px; }
+.shopping-aisle-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #2d6a4f;
+  margin-bottom: 8px;
+}
+
 /* Responsive */
 @media (max-width: 700px) {
   .app { flex-direction: column; }
