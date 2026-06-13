@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MEAL_TYPES, DIETARY_TAGS } from "../data/recipes";
 
-const blank = { name: "", category: "dinner", tags: [], ingredientsText: "", cookTime: "", servings: "" };
+const blank = { name: "", category: "dinner", tags: [], ingredientsText: "", stepsText: "", cookTime: "", servings: "" };
 
 function toInitial(recipe) {
   if (!recipe) return blank;
@@ -10,6 +10,7 @@ function toInitial(recipe) {
     category: recipe.category,
     tags: recipe.tags ?? [],
     ingredientsText: recipe.ingredients.map((i) => `${i.name}: ${i.amount}`).join("\n"),
+    stepsText: recipe.steps?.join("\n") ?? "",
     cookTime: recipe.cookTime ?? "",
     servings: recipe.servings ?? "",
   };
@@ -51,6 +52,7 @@ export default function RecipeForm({ initialRecipe, onSave, onCancel }) {
       category: form.category,
       tags: form.tags,
       ingredients,
+      steps: form.stepsText.split("\n").map((s) => s.trim()).filter(Boolean),
       cookTime: form.cookTime ? parseInt(form.cookTime, 10) : undefined,
       servings: form.servings ? parseInt(form.servings, 10) : undefined,
     });
@@ -131,6 +133,17 @@ export default function RecipeForm({ initialRecipe, onSave, onCancel }) {
           onChange={(e) => set("ingredientsText", e.target.value)}
           placeholder={"Rolled oats: 1 cup\nMilk: 250ml\nHoney: 1 tbsp"}
           rows={6}
+        />
+      </label>
+
+      <label className="form-label">
+        Steps <span className="form-hint">one step per line</span>
+        <textarea
+          className="form-input form-textarea"
+          value={form.stepsText}
+          onChange={(e) => set("stepsText", e.target.value)}
+          placeholder={"Boil water and cook oats for 5 minutes\nSlice banana and place on top\nDrizzle with honey"}
+          rows={5}
         />
       </label>
 

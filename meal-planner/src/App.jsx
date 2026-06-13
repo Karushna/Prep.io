@@ -6,7 +6,7 @@ import ChatBot from "./components/ChatBot";
 import { useMealPlan } from "./hooks/useMealPlan";
 import { useRecipes } from "./hooks/useRecipes";
 import { DAYS, MEAL_TYPES } from "./data/recipes";
-import { planWeek, suggestFromIngredients } from "./services/openai";
+import { planWeek, suggestFromIngredients, estimateNutrition } from "./services/openai";
 import "./App.css";
 
 export default function App() {
@@ -32,6 +32,11 @@ export default function App() {
   const [fridgeResult, setFridgeResult] = useState(null);
   const [fridgeLoading, setFridgeLoading] = useState(false);
   const [fridgeError, setFridgeError] = useState("");
+
+  // Nutrition dashboard state
+  const [nutritionCache, setNutritionCache] = useState({});
+  const [weekNutrition, setWeekNutrition] = useState(null);
+  const [nutritionLoading, setNutritionLoading] = useState(false);
 
   const shoppingList = getShoppingList();
 
@@ -88,6 +93,59 @@ export default function App() {
     }
   }
 
+  async function handleWeekNutrition() {
+    setNutritionLoading(true);
+    const seen = new Set();
+    const recipes = [];
+    for (const day of DAYS) {
+      for (const type of MEAL_TYPES) {
+        const r = plan[day]?.[type];
+        if (r && r.ingredients?.length > 0 && !seen.has(String(r.id))) {
+          seen.add(String(r.id));
+          recipes.push(r);
+        }
+      }
+    }
+
+    const totalMeals = DAYS.reduce(
+      (sum, day) => sum + MEAL_TYPES.filter((t) => plan[day]?.[t] !== null).length,
+      0
+    );
+
+    const results = await Promise.all(
+      recipes.map(async (r) => {
+        const key = String(r.id);
+        if (nutritionCache[key] && nutritionCache[key] !== "loading" && !nutritionCache[key].error) {
+          return nutritionCache[key];
+        }
+        try {
+          const data = await estimateNutrition(r);
+          setNutritionCache((prev) => ({ ...prev, [key]: data }));
+          return data;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const valid = results.filter(Boolean);
+    const totalCal = valid.reduce((s, d) => s + (d.calories ?? 0), 0);
+    const totalProtein = valid.reduce((s, d) => s + (parseInt(d.protein) || 0), 0);
+    const totalCarbs = valid.reduce((s, d) => s + (parseInt(d.carbs) || 0), 0);
+    const totalFat = valid.reduce((s, d) => s + (parseInt(d.fat) || 0), 0);
+
+    setWeekNutrition({
+      totalCal,
+      avgCal: totalMeals > 0 ? Math.round(totalCal / 7) : 0,
+      protein: totalProtein,
+      carbs: totalCarbs,
+      fat: totalFat,
+      covered: totalMeals,
+      total: 21,
+    });
+    setNutritionLoading(false);
+  }
+
   function handleSaveFridgeSuggestion() {
     if (!fridgeResult?.suggestion) return;
     addRecipe(fridgeResult.suggestion);
@@ -100,6 +158,8 @@ export default function App() {
     (sum, day) => sum + MEAL_TYPES.filter((t) => plan[day]?.[t] !== null).length,
     0
   );
+
+  const todayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   const navItems = [
     { id: "home", label: "Home", icon: "⌂" },
@@ -135,6 +195,7 @@ export default function App() {
       <main className="app-content">
         {tab === "home" && (
           <div className="home-page">
+            <div className="home-main">
             <div className="home-hero">
               <h1>Plan your week,<br />simplify your shopping.</h1>
               <p>Organise meals for every day, build your recipe library, and get a ready-to-go shopping list — all in one place.</p>
@@ -196,33 +257,94 @@ export default function App() {
               )}
             </div>
 
-            <div className="home-cards">
-              <button className="home-card" onClick={() => setTab("planner")}>
-                <span className="home-card-icon">📅</span>
-                <div className="home-card-body">
-                  <h3>Weekly Plan</h3>
-                  <p>{mealsPlanned > 0 ? `${mealsPlanned} of 21 meals planned this week` : "No meals planned yet — start adding"}</p>
-                </div>
-                <span className="home-card-arrow">→</span>
-              </button>
+            <div className="nutrition-dashboard">
+              <div className="nutrition-dashboard-header">
+                <h3>📊 Weekly Nutrition</h3>
+                <button
+                  className="btn-ai"
+                  onClick={handleWeekNutrition}
+                  disabled={nutritionLoading || mealsPlanned === 0}
+                >
+                  {nutritionLoading ? "Calculating…" : weekNutrition ? "Recalculate" : "Calculate"}
+                </button>
+              </div>
+              {weekNutrition ? (
+                <>
+                  <div className="nutrition-stats">
+                    <div className="nutrition-stat">
+                      <span className="nutrition-stat-value">{weekNutrition.totalCal.toLocaleString()}</span>
+                      <span className="nutrition-stat-label">kcal / week</span>
+                    </div>
+                    <div className="nutrition-stat">
+                      <span className="nutrition-stat-value">{weekNutrition.avgCal.toLocaleString()}</span>
+                      <span className="nutrition-stat-label">kcal / day</span>
+                    </div>
+                    <div className="nutrition-stat">
+                      <span className="nutrition-stat-value">{weekNutrition.protein}g</span>
+                      <span className="nutrition-stat-label">protein / week</span>
+                    </div>
+                    <div className="nutrition-stat">
+                      <span className="nutrition-stat-value">{weekNutrition.carbs}g</span>
+                      <span className="nutrition-stat-label">carbs / week</span>
+                    </div>
+                    <div className="nutrition-stat">
+                      <span className="nutrition-stat-value">{weekNutrition.fat}g</span>
+                      <span className="nutrition-stat-label">fat / week</span>
+                    </div>
+                  </div>
+                  <p className="nutrition-note">
+                    Based on {weekNutrition.covered} of {weekNutrition.total} meals planned — AI estimates only.
+                  </p>
+                </>
+              ) : (
+                <p className="nutrition-empty">
+                  {mealsPlanned === 0
+                    ? "Plan some meals first, then calculate your weekly nutrition."
+                    : "Click Calculate to get an AI estimate of your weekly nutrition."}
+                </p>
+              )}
+            </div>
+            </div>
 
-              <button className="home-card" onClick={() => setTab("shopping")}>
-                <span className="home-card-icon">🛒</span>
-                <div className="home-card-body">
-                  <h3>Shopping List</h3>
-                  <p>{shoppingList.length > 0 ? `${shoppingList.length} ingredient${shoppingList.length !== 1 ? "s" : ""} to buy` : "Plan meals to generate your list"}</p>
-                </div>
-                <span className="home-card-arrow">→</span>
-              </button>
+            <div className="home-side">
+              <p className="home-side-label">Quick access</p>
+              <div className="home-cards">
+                <button className="home-card" onClick={() => setTab("planner")}>
+                  <span className="home-card-icon">📅</span>
+                  <div className="home-card-body">
+                    <h3>Weekly Plan</h3>
+                    <p>{mealsPlanned > 0 ? `${mealsPlanned} of 21 meals planned` : "No meals planned yet"}</p>
+                  </div>
+                  <span className="home-card-arrow">→</span>
+                </button>
 
-              <button className="home-card" onClick={() => setTab("recipes")}>
-                <span className="home-card-icon">🍴</span>
-                <div className="home-card-body">
-                  <h3>My Recipes</h3>
-                  <p>{allRecipes.length} recipes available · {customRecipes.length} custom</p>
-                </div>
-                <span className="home-card-arrow">→</span>
-              </button>
+                <button className="home-card" onClick={() => setTab("shopping")}>
+                  <span className="home-card-icon">🛒</span>
+                  <div className="home-card-body">
+                    <h3>Shopping List</h3>
+                    <p>{shoppingList.length > 0 ? `${shoppingList.length} item${shoppingList.length !== 1 ? "s" : ""} to buy` : "Plan meals to generate"}</p>
+                  </div>
+                  <span className="home-card-arrow">→</span>
+                </button>
+
+                <button className="home-card" onClick={() => setTab("recipes")}>
+                  <span className="home-card-icon">🍴</span>
+                  <div className="home-card-body">
+                    <h3>My Recipes</h3>
+                    <p>{allRecipes.length} recipes · {customRecipes.length} custom</p>
+                  </div>
+                  <span className="home-card-arrow">→</span>
+                </button>
+
+                <button className="home-card" onClick={() => setTab("chat")}>
+                  <span className="home-card-icon">💬</span>
+                  <div className="home-card-body">
+                    <h3>AI Chat</h3>
+                    <p>Plan meals and get suggestions</p>
+                  </div>
+                  <span className="home-card-arrow">→</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -251,16 +373,39 @@ export default function App() {
           />
         )}
         {tab === "chat" && (
-          <ChatBot
-            plan={plan}
-            allRecipes={allRecipes}
-            shoppingList={shoppingList}
-            onAssignMeal={assignMeal}
-            onClearMeal={clearMeal}
-            onClearAll={clearAll}
-            onAddRecipe={addRecipe}
-            onNavigate={setTab}
-          />
+          <div className="chat-layout">
+            <ChatBot
+              plan={plan}
+              allRecipes={allRecipes}
+              shoppingList={shoppingList}
+              onAssignMeal={assignMeal}
+              onClearMeal={clearMeal}
+              onClearAll={clearAll}
+              onAddRecipe={addRecipe}
+              onNavigate={setTab}
+            />
+            <div className="chat-today-panel">
+              <div className="chat-today-header">
+                <span className="chat-today-heading">Today</span>
+                <span className="chat-today-day">{todayName}</span>
+              </div>
+              {MEAL_TYPES.map((type) => {
+                const meal = plan[todayName]?.[type];
+                return (
+                  <div key={type} className="chat-today-slot">
+                    <span className="chat-today-type">{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                    <span className={`chat-today-meal ${meal ? "" : "chat-today-empty"}`}>
+                      {meal ? meal.name : "Not planned"}
+                    </span>
+                  </div>
+                );
+              })}
+              <button className="btn-secondary chat-today-action" onClick={() => setTab("planner")}>
+                Go to Planner →
+              </button>
+              <p className="chat-today-note">{mealsPlanned} of 21 meals planned this week</p>
+            </div>
+          </div>
         )}
       </main>
     </div>

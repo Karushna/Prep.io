@@ -10,6 +10,7 @@ export default function RecipeManager({ customRecipes, onAdd, onUpdate, onDelete
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [nutrition, setNutrition] = useState({}); // { [id]: data | "loading" | { error } }
+  const [expandedId, setExpandedId] = useState(null);
 
   async function handleGenerate() {
     if (!aiPrompt.trim()) return;
@@ -113,6 +114,13 @@ export default function RecipeManager({ customRecipes, onAdd, onUpdate, onDelete
                       <div className="manager-item-actions">
                         <button
                           className="btn-icon"
+                          onClick={() => setExpandedId((prev) => (prev === r.id ? null : r.id))}
+                          title="Show details"
+                        >
+                          {expandedId === r.id ? "▲" : "▼"}
+                        </button>
+                        <button
+                          className="btn-icon"
                           onClick={() => handleNutrition(r)}
                           title="Estimate nutrition"
                           disabled={nutrition[r.id] === "loading"}
@@ -143,6 +151,30 @@ export default function RecipeManager({ customRecipes, onAdd, onUpdate, onDelete
                         )}
                       </div>
                     )}
+                    {expandedId === r.id && (
+                      <div className="manager-details">
+                        {r.ingredients?.length > 0 && (
+                          <>
+                            <p className="manager-details-label">Ingredients</p>
+                            <ul className="manager-details-list">
+                              {r.ingredients.map((ing, i) => (
+                                <li key={i}>{ing.amount ? `${ing.name} — ${ing.amount}` : ing.name}</li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
+                        {r.steps?.length > 0 && (
+                          <>
+                            <p className="manager-details-label">Steps</p>
+                            <ol className="manager-details-list">
+                              {r.steps.map((step, i) => (
+                                <li key={i}>{step}</li>
+                              ))}
+                            </ol>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -153,17 +185,40 @@ export default function RecipeManager({ customRecipes, onAdd, onUpdate, onDelete
             <h3 className="recipe-section-title">Built-in ({builtInRecipes.length})</h3>
             <ul className="manager-list">
               {builtInRecipes.map((r) => (
-                <li key={r.id} className="manager-item manager-item-readonly">
-                  <div className="manager-item-info">
-                    <span className="manager-item-name">{r.name}</span>
-                    <span className="manager-item-meta">
-                      {r.category}
-                      {r.tags?.length > 0 && (
-                        <> · {r.tags.map((t) => <span key={t} className="recipe-tag">{t}</span>)}</>
-                      )}
-                    </span>
+                <li key={r.id} className="manager-item manager-item-column manager-item-readonly">
+                  <div className="manager-item-row">
+                    <div className="manager-item-info">
+                      <span className="manager-item-name">{r.name}</span>
+                      <span className="manager-item-meta">
+                        {r.category}
+                        {r.cookTime && <> · 🕐 {r.cookTime} min</>}
+                        {r.servings && <> · Serves {r.servings}</>}
+                        {r.tags?.length > 0 && (
+                          <> · {r.tags.map((t) => <span key={t} className="recipe-tag">{t}</span>)}</>
+                        )}
+                      </span>
+                    </div>
+                    <div className="manager-item-actions">
+                      <button
+                        className="btn-icon"
+                        onClick={() => setExpandedId((prev) => (prev === r.id ? null : r.id))}
+                        title="Show details"
+                      >
+                        {expandedId === r.id ? "▲" : "▼"}
+                      </button>
+                      <span className="readonly-badge">built-in</span>
+                    </div>
                   </div>
-                  <span className="readonly-badge">built-in</span>
+                  {expandedId === r.id && r.ingredients?.length > 0 && (
+                    <div className="manager-details">
+                      <p className="manager-details-label">Ingredients</p>
+                      <ul className="manager-details-list">
+                        {r.ingredients.map((ing, i) => (
+                          <li key={i}>{ing.amount ? `${ing.name} — ${ing.amount}` : ing.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

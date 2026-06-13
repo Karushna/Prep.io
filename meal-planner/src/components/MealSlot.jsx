@@ -185,11 +185,23 @@ export default function MealSlot({ day, mealType, meal, recipes, plan, onAssign,
                       </div>
                     </div>
                     {expandedId === r.id && (
-                      <ul className="preview-ingredients">
-                        {r.ingredients.map((ing, i) => (
-                          <li key={i}>{ing.amount ? `${ing.name} — ${ing.amount}` : ing.name}</li>
-                        ))}
-                      </ul>
+                      <div className="preview-expanded">
+                        <ul className="preview-ingredients">
+                          {r.ingredients.map((ing, i) => (
+                            <li key={i}>{ing.amount ? `${ing.name} — ${ing.amount}` : ing.name}</li>
+                          ))}
+                        </ul>
+                        {r.steps?.length > 0 && (
+                          <>
+                            <p className="preview-steps-label">Steps</p>
+                            <ol className="preview-steps">
+                              {r.steps.map((step, i) => (
+                                <li key={i}>{step}</li>
+                              ))}
+                            </ol>
+                          </>
+                        )}
+                      </div>
                     )}
                   </li>
                 ))}
