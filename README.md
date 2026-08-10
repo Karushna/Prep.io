@@ -1,4 +1,4 @@
-# 🥗 Prep.io - AI-Powered Meal Planning
+# 🥗 Prep.io - AI-Powered Meal Planner
 
 > **Smart meal planning made simple.** Plan your entire week's meals, generate intelligent shopping lists, and discover recipes based on available ingredients, all powered by AI.
 
